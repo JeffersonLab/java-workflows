@@ -1,0 +1,37 @@
+name: Publish to gh-pages
+
+on:
+  workflow_call:
+    inputs:
+      semvertag:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: docs
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+      - name: Gradle doc tasks
+        run: ./gradlew javadoc
+      - name: Deploy Docs
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/docs/javadoc
+          target-folder: ${{ inputs.semver }}
