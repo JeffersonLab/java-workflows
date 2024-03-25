@@ -1,4 +1,4 @@
-name: Publish to Maven Central
+name: Maven Central Publish
 
 on:
   workflow_call:
