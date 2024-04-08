@@ -6,6 +6,10 @@ on:
       semvertag:
         required: true
         type: string
+      folder:
+        required: false
+        type: string
+        default: 'build/docs/javadoc'
 
 permissions:
   contents: write
@@ -33,5 +37,5 @@ jobs:
       - name: Deploy Docs
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build/docs/javadoc
+          folder: ${{ inputs.folder }}
           target-folder: ${{ inputs.semvertag }}
