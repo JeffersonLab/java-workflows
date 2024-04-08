@@ -8,14 +8,18 @@ on:
         type: string
     outputs:
       semvertag:
-        description: "The semantic versioning tag name created"
+        description: "The semantic versioning tag name created ('v' prefix)"
         value: ${{ jobs.release.outputs.semvertag }}
+      semver:
+        description: "The semantic versioning name created (no prefix)"
+        value: ${{ jobs.release.outputs.semver }}
 
 jobs:
   release:
     runs-on: ubuntu-latest
     outputs:
       semvertag: ${{ steps.getver.outputs.semvertag }}
+      semver: ${{ steps.getver.outputs.semver }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,6 +39,7 @@ jobs:
           VER=$(cat VERSION)
           echo "VERSION=v$VER" >> $GITHUB_ENV
           echo "semvertag=v$VER" >> $GITHUB_OUTPUT
+          echo "semver=$VER" >> $GITHUB_OUTPUT
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
