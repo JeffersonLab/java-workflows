@@ -1,5 +1,5 @@
 # java workflows
-GitHub action java workflows
+GitHub action Java workflows
 
 | Name                 | Description                      |
 |----------------------|----------------------------------|
