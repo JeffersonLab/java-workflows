@@ -1,0 +1,5 @@
+{
+  "dockerComposeFile": "dev.yaml",
+  "service": "dev",
+  "workspaceFolder": "/workspaces/java-workflows"
+}

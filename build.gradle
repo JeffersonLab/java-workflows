@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Java Workflows'
+group 'org.jlab'
+version new File("${projectDir}/VERSION").text.trim()
+ext.releaseDate = new Date().format('MMM dd yyyy')
+
+tasks.withType(JavaCompile) {
+    options.release = 8
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+task hello (type: JavaExec) {
+    group 'Application'
+    description 'Hello World Test'
+    mainClass = 'org.jlab.workflows.Hello'
+    classpath = sourceSets.test.runtimeClasspath
+}
+
+javadoc {
+    options.overview = "src/overview.html"
+    options.source = 8
+    options.with {
+        links 'https://devdocs.io/openjdk~8/'
+    }
+}
