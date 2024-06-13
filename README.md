@@ -1,4 +1,4 @@
-# java workflows [![CI](https://github.com/JeffersonLab/java-workflows/actions/workflows/ci.yml/badge.svg)](https://github.com/JeffersonLab/java-workflows/actions/workflows/ci.yml) <a href="https://codespaces.new/JeffersonLab/java-workflows"><img src="https://github.com/codespaces/badge.svg" height="20"></a>
+# java workflows [![CI](https://github.com/JeffersonLab/java-workflows/actions/workflows/ci.yaml/badge.svg)](https://github.com/JeffersonLab/java-workflows/actions/workflows/ci.yaml) <a href="https://codespaces.new/JeffersonLab/java-workflows"><img src="https://github.com/codespaces/badge.svg" height="20"></a>
 GitHub action Java workflows
 
 ## Reusable workflows
