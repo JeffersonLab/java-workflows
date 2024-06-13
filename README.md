@@ -3,20 +3,20 @@ GitHub action Java workflows
 
 ## Reusable workflows
 
-| Name                 | Description                      |
-|----------------------|----------------------------------|
-| [gh-pages-publish.yml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/gh-pages-publish.yml) | Publish API docs to GitHub Pages |
-| [gh-release.yml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/gh-release.yml) | Create a GitHub Release |
-| [maven-publish.yml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/maven-publish.yml) | Publish an artifact on Maven Central |
-| [unit-ci.yml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/unit-ci.yml) | Build and run Unit tests |
+| Name                                                                                                                      | Description                          |
+|---------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| [gh-pages-publish.yaml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/gh-pages-publish.yaml) | Publish API docs to GitHub Pages     |
+| [gh-release.yaml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/gh-release.yaml)             | Create a GitHub Release              |
+| [maven-publish.yaml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/maven-publish.yaml)       | Publish an artifact on Maven Central |
+| [unit-ci.yaml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/unit-ci.yaml)                   | Build and run Unit tests             |
 
 ## How to use
 This project uses it's own workflows in order to test them (the Java App/Lib is just a demo/example).  Copy and paste one or more of the following files into your project `.github/workflows` directory and update parameters accordingly:
 
-| Name                                                                                        | Description                      |
-|---------------------------------------------------------------------------------------------|----------------------------------|
-| [ci.yml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/ci.yml) | Continuous Integration of an App/Lib |
-| [cd.yml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/cd.yml) | Continuous Deployment of an App/Lib with GitHub release |
+| Name                                                                                          | Description                                             |
+|-----------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| [ci.yaml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/ci.yaml) | Continuous Integration of an App/Lib                    |
+| [cd.yaml](https://github.com/JeffersonLab/java-workflows/blob/main/.github/workflows/cd.yaml) | Continuous Deployment of an App/Lib with GitHub release |
 
 The `ci` workflow invokes `unit-ci` to configure, build, and unit test.   The `ci` workflow can be customized with docker commands to launch containers and run integration tests ([Java Example](https://github.com/JeffersonLab/myquery/blob/e47681393f9a7a900dc1f0a932b6271bfa6356ed/.github/workflows/ci.yml#L20-L44])).
 
