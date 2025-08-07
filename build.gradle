@@ -3,11 +3,11 @@ plugins {
 }
 
 description = 'Java Workflows'
-group 'org.jlab'
-version new File("${projectDir}/VERSION").text.trim()
+group = 'org.jlab'
+version = new File("${projectDir}/VERSION").text.trim()
 ext.releaseDate = new Date().format('MMM dd yyyy')
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.release = 8
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -29,13 +29,13 @@ dependencies {
 test {
     testLogging {
         events "passed", "skipped", "failed"
-        exceptionFormat "full"
+        exceptionFormat = "full"
     }
 }
 
-task hello (type: JavaExec) {
-    group 'Application'
-    description 'Hello World Test'
+tasks.register('hello', JavaExec) {
+    group = 'Application'
+    description = 'Hello World Test'
     mainClass = 'org.jlab.workflows.Hello'
     classpath = sourceSets.test.runtimeClasspath
 }
