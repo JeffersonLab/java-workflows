@@ -10,12 +10,18 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     uses: jeffersonlab/java-workflows/.github/workflows/gh-release.yaml@v2
     with:
       files: build/Hi
     secrets: inherit
 
   docs_publish:
+    permissions:
+      pages: write
+      id-token: write
+      contents: write
     needs:
       - release
     uses: jeffersonlab/java-workflows/.github/workflows/gh-pages-publish.yaml@v2
