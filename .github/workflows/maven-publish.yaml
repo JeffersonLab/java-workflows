@@ -2,10 +2,11 @@ name: Maven Central Publish
 
 on:
   workflow_call:
-    java-version:
-      required: false
-      type: string
-      default: '21'
+    inputs:
+      java-version:
+        required: false
+        type: string
+        default: '21'
     secrets:
       OSSRH_USERNAME:
         required: true
