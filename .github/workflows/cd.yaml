@@ -8,11 +8,6 @@ on:
     tags-ignore:
       - '**'
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 jobs:
   release:
     permissions:
@@ -26,6 +21,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: write
     needs:
       - release
     uses: jeffersonlab/java-workflows/.github/workflows/gh-pages-publish.yaml@v2
