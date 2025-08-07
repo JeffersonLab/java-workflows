@@ -21,7 +21,6 @@ jobs:
     permissions:
       pages: write
       id-token: write
-      contents: write
     needs:
       - release
     uses: jeffersonlab/java-workflows/.github/workflows/gh-pages-publish.yaml@v2
