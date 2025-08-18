@@ -8,9 +8,9 @@ on:
         type: string
         default: '21'
     secrets:
-      OSSRH_USERNAME:
+      MAVEN_CENTRAL_USERNAME:
         required: true
-      OSSRH_PASSWORD:
+      MAVEN_CENTRAL_PASSWORD:
         required: true
       SIGNING_KEY:
         required: true
