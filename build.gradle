@@ -1,8 +1,9 @@
 plugins {
     id 'java-library'
+    id "com.vanniktech.maven.publish" version "0.34.0"
 }
 
-description = 'Java Workflows'
+description = 'Java GitHub Action Workflows'
 group = 'org.jlab'
 version = new File("${projectDir}/VERSION").text.trim()
 ext.releaseDate = new Date().format('MMM dd yyyy')
@@ -12,38 +13,57 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 repositories {
     mavenCentral()
 }
-
 dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
-
 test {
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat = "full"
     }
 }
-
 tasks.register('hello', JavaExec) {
     group = 'Application'
     description = 'Hello World Test'
     mainClass = 'org.jlab.workflows.Hello'
     classpath = sourceSets.test.runtimeClasspath
 }
-
 javadoc {
     options.overview = "src/overview.html"
     options.source = 8
     options.with {
         links 'https://devdocs.io/openjdk~8/'
+    }
+}
+mavenPublishing {
+    publishToMavenCentral(true)
+    signAllPublications()
+    coordinates("org.jlab", "java-workflows", version)
+
+    pom {
+        name = project.name
+        description = project.description
+        url = "https://github.com/JeffersonLab/java-workflows/"
+        licenses {
+            license {
+                name = "The MIT License"
+                url = "https://github.com/JeffersonLab/jmyapi/blob/master/LICENSE"
+            }
+        }
+        developers {
+            developer {
+                id = "slominskir"
+                name = "Ryan Slominski"
+                url = "https://github.com/slominskir/"
+            }
+        }
+        scm {
+            url = "https://github.com/JeffersonLab/java-workflows"
+            connection = "scm:git:git://github.com/JeffersonLab/java-workflows.git"
+            developerConnection = "scm:git:ssh://git@github.com/JeffersonLab/java-workflows.git"
+        }
     }
 }
