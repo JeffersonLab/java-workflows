@@ -24,6 +24,14 @@ The `cd` workflow invokes `gh-release` and optionally `gh-pages-publish`.  The `
 
 The `gh-pages-publish` workflow creates docs on GitHub Pages.  For example, the demo Lib docs are here: [javadoc API docs](https://jeffersonlab.github.io/java-workflows/).  The workflow creates a new directory in the [gh-pages](https://github.com/JeffersonLab/java-workflows/tree/gh-pages) branch of your project for each release using the semver name and copies the auto generated API docs there.  An index HTML with JavaScript can then use the GitHub API to lookup the directories in the branch and list them in the index.  This means there is a one-time setup for each project where you need to commit and push the index.html, index.js, and .nojekyll files.  The path to the docs are then obtained at `https://jeffersonlab.github.io/project/` where project is your project name.  Example [setup commit](https://github.com/JeffersonLab/cxx-workflows/commit/36de0f35037c3b14834bbfbbb9e7784f2e70eebe) - notice first line of index.js must be customized with project name.
 
+The `maven-publish` workflow publishes to Maven Central and assumes you have an account already setup at [central.sontatype.com](https://central.sonatype.com/).  You must already have a namespace defined, claimed, and validated, plus a GPG Signing key published and a Maven Central Access Token created.  Then, this action requires the following secrets be defined in your project GitHub Action Secrets config:
+- MAVEN_CENTRAL_USERNAME: This is actually an access token name (not your personal central username).
+- MAVEN_CENTRAL_PASSWORD: This is the access token value
+- SIGNING_KEY: This is an ASCII armored GPG Signing Key.
+- SIGNING_PASSWORD: This is the password used to protect your signing key
+
+This action relies on the third-party [gradle-maven-plublish-plugin](https://github.com/vanniktech/gradle-maven-publish-plugin).
+
 ## Demo App
 This project includes a `Hello World` Java app to demonstrate the workflow.  Use the [java-devcontainer](https://github.com/JeffersonLab/java-devcontainer) to configure, build, and test:
 
