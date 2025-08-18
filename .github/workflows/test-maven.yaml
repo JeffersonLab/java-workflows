@@ -1,0 +1,12 @@
+name: Test Maven
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: jeffersonlab/java-workflows/.github/workflows/maven-publish.yaml@main
+    secrets: inherit
