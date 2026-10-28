@@ -12,7 +12,7 @@ jobs:
   release:
     permissions:
       contents: write
-    uses: jeffersonlab/java-workflows/.github/workflows/gh-release.yaml@v2
+    uses: jeffersonlab/java-workflows/.github/workflows/gh-release.yaml@v3
     with:
       files: build/Hi
     secrets: inherit
@@ -24,7 +24,7 @@ jobs:
       contents: write
     needs:
       - release
-    uses: jeffersonlab/java-workflows/.github/workflows/gh-pages-publish.yaml@v2
+    uses: jeffersonlab/java-workflows/.github/workflows/gh-pages-publish.yaml@v3
     with:
       semvertag: ${{ needs.release.outputs.semvertag }}
     secrets: inherit
