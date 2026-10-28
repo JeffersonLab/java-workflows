@@ -3,6 +3,11 @@ name: GitHub Release
 on:
   workflow_call:
     inputs:
+      any-branch:
+        description: "Release from any branch the caller runs on, not only the default branch. The caller must restrict allowed branches in its trigger."
+        required: false
+        type: boolean
+        default: false
       java-version:
         required: false
         type: string
@@ -20,6 +25,7 @@ on:
 
 jobs:
   release:
+    if: inputs.any-branch || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     outputs:
       semvertag: ${{ steps.getver.outputs.semvertag }}
@@ -41,12 +47,13 @@ jobs:
         id: getver
         run: |
           VER=$(cat VERSION)
-          echo "VERSION=v$VER" >> $GITHUB_ENV
-          echo "semvertag=v$VER" >> $GITHUB_OUTPUT
-          echo "semver=$VER" >> $GITHUB_OUTPUT
+          echo "VERSION=v$VER" >> "$GITHUB_ENV"
+          echo "semvertag=v$VER" >> "$GITHUB_OUTPUT"
+          echo "semver=$VER" >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           tag_name: ${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
           files: ${{ inputs.files }}

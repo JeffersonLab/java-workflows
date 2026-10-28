@@ -22,6 +22,47 @@ The `ci` workflow invokes `unit-ci` to configure, build, and unit test.   The `c
 
 The `cd` workflow invokes `gh-release` and optionally `gh-pages-publish`.  The `gh-release` workflow uses the VERSION file to determine which tag to create.  The `cd` workflow generally should monitor the VERSION file for changes to trigger the workflow.
 
+### Release and publish branches
+
+By default, `gh-release`, `gh-pages-publish`, and `maven-publish` run only when the
+caller runs on its repository's default branch. Other branch refs, tag refs, and
+pull request merge refs skip the release or publish job. Jobs that depend on a
+skipped job through `needs` are also skipped unless their condition explicitly
+allows them to run, such as `always()`.
+
+For projects that also release from hotfix branches, set `any-branch: true` and
+restrict the caller's trigger to the intended branches:
+
+```yaml
+on:
+  push:
+    branches: [main, 'hotfix/**']
+    paths: ['VERSION']
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    uses: JeffersonLab/java-workflows/.github/workflows/gh-release.yaml@v2
+    with:
+      any-branch: true
+    secrets: inherit
+```
+
+`any-branch` disables the ref check entirely, including for tag and pull request
+runs, so each caller must restrict its events and refs appropriately. Set the input
+on each publish workflow that should also run from those branches; it is not
+inherited from the release job. Newly created release tags target the caller's
+`${{ github.sha }}`, matching the commit checked out for the build. Existing tags
+are not moved.
+
+The default-branch restriction also applies to manually dispatched callers,
+including `test-maven.yaml`, which publishes real artifacts. Changes to these
+reusable workflows reach callers using `@v2` only after a maintainer releases them
+and moves the `v2` tag.
+
+### Publishing setup
+
 The `gh-pages-publish` workflow creates docs on GitHub Pages.  For example, the demo Lib docs are here: [javadoc API docs](https://jeffersonlab.github.io/java-workflows/).  The workflow creates a new directory in the [gh-pages](https://github.com/JeffersonLab/java-workflows/tree/gh-pages) branch of your project for each release using the semver name and copies the auto generated API docs there.  An index HTML with JavaScript can then use the GitHub API to lookup the directories in the branch and list them in the index.  This means there is a one-time setup for each project where you need to commit and push the index.html, index.js, and .nojekyll files.  The path to the docs are then obtained at `https://jeffersonlab.github.io/project/` where project is your project name.  Example [setup commit](https://github.com/JeffersonLab/cxx-workflows/commit/36de0f35037c3b14834bbfbbb9e7784f2e70eebe) - notice first line of index.js must be customized with project name.
 
 The `maven-publish` workflow publishes to Maven Central and assumes you have an account already setup at [central.sontatype.com](https://central.sonatype.com/).  You must already have a namespace defined, claimed, and validated, plus a GPG Signing key published and a Maven Central Access Token created.  Then, this action requires the following secrets be defined in your project GitHub Action Secrets config:
