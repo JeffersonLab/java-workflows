@@ -8,6 +8,11 @@ on:
         required: false
         type: boolean
         default: false
+      notes-from:
+        description: 'Read the merged pull request’s "## Release notes" section (merge-request), or use generated notes only (none).'
+        required: false
+        type: string
+        default: 'merge-request'
       java-version:
         required: false
         type: string
@@ -31,6 +36,14 @@ jobs:
       semvertag: ${{ steps.getver.outputs.semvertag }}
       semver: ${{ steps.getver.outputs.semver }}
     steps:
+      - name: Validate release notes source
+        env:
+          NOTES_FROM: ${{ inputs.notes-from }}
+        run: |
+          case "$NOTES_FROM" in
+            merge-request|none) ;;
+            *) echo '::error::notes-from must be merge-request or none'; exit 1 ;;
+          esac
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Build
@@ -50,10 +63,108 @@ jobs:
           echo "VERSION=v$VER" >> "$GITHUB_ENV"
           echo "semvertag=v$VER" >> "$GITHUB_OUTPUT"
           echo "semver=$VER" >> "$GITHUB_OUTPUT"
+      - name: Read release notes from the merged pull request
+        id: notes
+        if: inputs.notes-from == 'merge-request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+          from urllib.error import HTTPError
+          from urllib.request import Request, urlopen
+
+
+          def read_pull_requests():
+              # Keep authenticated rate limits when possible. Public callers with only
+              # contents: write can fall back to the same public endpoint without a token.
+              headers = {
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                  "X-GitHub-Api-Version": "2022-11-28",
+              }
+              endpoint = (f'{os.environ["GITHUB_API_URL"]}/repos/'
+                          f'{os.environ["GITHUB_REPOSITORY"]}/commits/'
+                          f'{os.environ["GITHUB_SHA"]}/pulls')
+              pulls = []
+              page = 1
+              while True:
+                  url = f"{endpoint}?per_page=100&page={page}"
+                  try:
+                      response = urlopen(Request(url, headers=headers), timeout=30)
+                  except HTTPError as error:
+                      if error.code != 403 or os.environ["REPOSITORY_PRIVATE"] != "false":
+                          raise
+                      headers.pop("Authorization", None)
+                      response = urlopen(Request(url, headers=headers), timeout=30)
+                  with response:
+                      batch = json.load(response)
+                  pulls.extend(batch)
+                  if len(batch) < 100:
+                      return pulls
+                  page += 1
+
+
+          def extract_notes(body):
+              # Ignore headings inside fenced code, including SQL/shell upgrade examples.
+              lines = []
+              active = False
+              fence = None
+              for line in (body or "").splitlines():
+                  marker = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+                  if fence:
+                      if (marker and marker[1][0] == fence[0]
+                              and len(marker[1]) >= len(fence)
+                              and not marker[2].strip()):
+                          fence = None
+                  elif marker:
+                      fence = marker[1]
+                  else:
+                      heading = re.match(r"^ {0,3}(#{1,2})(?:[ \t]+(.*)|[ \t]*)$", line)
+                      if heading:
+                          if active:
+                              break
+                          title = re.sub(r"[ \t]+#+[ \t]*$", "", heading[2] or "").strip()
+                          active = heading[1] == "##" and title == "Release notes"
+                          continue
+                  if active:
+                      lines.append(line)
+              notes = "\n".join(lines).strip()
+              return notes + "\n" if notes else ""
+
+
+          def main():
+              matches = [pr for pr in read_pull_requests()
+                         if pr.get("merged_at")
+                         and pr.get("merge_commit_sha") == os.environ["GITHUB_SHA"]
+                         and pr["base"]["repo"]["full_name"].lower()
+                         == os.environ["GITHUB_REPOSITORY"].lower()
+                         and pr["base"]["ref"] == os.environ["GITHUB_REF_NAME"]]
+              if len(matches) > 1:
+                  raise RuntimeError("Multiple merged pull requests match the release commit")
+              notes = extract_notes(matches[0].get("body")) if matches else ""
+              path = Path(os.environ["RUNNER_TEMP"]) / "release-notes.md"
+              path.write_text(notes, encoding="utf-8")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  # Do not pass an empty body_path: keep the action's existing behavior
+                  # when there is no PR or no nonempty Release notes section.
+                  if notes:
+                      output.write(f"body_path={path}\n")
+
+
+          if __name__ == "__main__":
+              main()
+          PY
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          body_path: ${{ steps.notes.outputs.body_path }}
           tag_name: ${{ env.VERSION }}
           target_commitish: ${{ github.sha }}
           files: ${{ inputs.files }}

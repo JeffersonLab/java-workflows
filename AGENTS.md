@@ -25,6 +25,9 @@ updated independently.
   workflow changes, validate YAML and expressions with `actionlint` when available, inspect
   affected inputs, outputs, secrets and permissions, and explain any behavior not exercised
   by the PR checks. A Gradle build alone does not validate workflow orchestration.
+- For release-note extraction changes, install `tests/requirements.txt` in a virtual
+  environment and run `python -m unittest discover -s tests -v`. These tests exercise the
+  Python embedded in the workflow with synthetic PRs and mocked HTTP responses.
 - Local build, demo and documentation checks need no services, ports, databases or publishing
   credentials. The optional devcontainer has a fixed `container_name: dev`; inspect existing
   containers before using it in a shared VM.
@@ -169,8 +172,11 @@ the pull request's required checks.
   `gh-release.yaml@v2` and then `gh-pages-publish.yaml@v2`. It builds the demo, creates a
   `v<VERSION>` GitHub release with generated notes, and publishes versioned Javadoc to the
   `gh-pages` branch. Release-only change: `VERSION` only.
-- Release notes: put highlights and manual upgrade steps in the PR description for the
-  maintainer to add to the generated notes. Versions: major for incompatible workflow
+- Release notes: put highlights and manual upgrade steps under `## Release notes` in the
+  release PR description; end the section with another level-one or level-two heading
+  before checks or attribution. See README.md for the extraction and permission rules.
+  Until this feature is released and the caller uses it, the maintainer still copies notes.
+  Versions: major for incompatible workflow
   changes, minor for compatible features, patch for compatible fixes, as described in
   [Workflow Updates](README.md#workflow-updates).
 - Change `VERSION`, create release tags or move a major-version tag (such as `v2`) only when

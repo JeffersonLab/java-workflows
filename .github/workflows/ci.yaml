@@ -17,3 +17,14 @@ permissions:
 jobs:
   build:
     uses: jeffersonlab/java-workflows/.github/workflows/unit-ci.yaml@v2
+
+  release-notes-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install workflow test dependency
+        run: |
+          python3 -m venv "$RUNNER_TEMP/release-notes-tests"
+          "$RUNNER_TEMP/release-notes-tests/bin/pip" install -r tests/requirements.txt
+      - name: Test release notes without publishing
+        run: '"$RUNNER_TEMP/release-notes-tests/bin/python" -m unittest discover -s tests -v'
