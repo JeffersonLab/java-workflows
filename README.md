@@ -61,6 +61,63 @@ including `test-maven.yaml`, which publishes real artifacts. Changes to these
 reusable workflows reach callers using `@v2` only after a maintainer releases them
 and moves the `v2` tag.
 
+### Release notes from a pull request
+
+By default, `gh-release` reads the merged pull request for the caller's release
+commit and prepends its `## Release notes` section to GitHub's generated notes.
+Use that section in the pull request that changes `VERSION`:
+
+````markdown
+## Release notes
+
+### Highlights
+Describe the changes users should know about.
+
+### Upgrade steps
+List any settings, database changes, or runtime upgrades required before deploying.
+
+## Checks
+Record validation here, outside the published notes.
+
+## Attribution
+Prepared-by: ...
+````
+
+The heading is case-sensitive. The section ends at the next level-one or
+level-two heading, or the end of the description. Level-three subheadings,
+horizontal rules, and fenced code blocks are preserved. Put checks and attribution
+under a separate heading so they are not published. If there is no matching merged
+PR (for example, a direct push), no section, or an empty section, the workflow uses
+only GitHub's generated notes. There is no commit-message fallback.
+
+The lookup selects a merged PR whose merge commit, target repository, and target
+branch match the release run; it does not combine notes from earlier PRs. Multiple
+matching PRs or API failures stop the job before it publishes, so required upgrade
+notes are not silently lost. A rerun reads the PR's current description.
+
+Public repositories keep their existing `contents: write` caller permission. The
+lookup tries the workflow token first; if GitHub rejects it with HTTP 403, it
+retries the public endpoint without authentication. That fallback has GitHub's
+lower unauthenticated rate limit. Private repositories must also grant
+`pull-requests: read` on the calling release job:
+
+```yaml
+permissions:
+  contents: write
+  pull-requests: read
+```
+
+See GitHub's [commit-associated PR API permissions](https://docs.github.com/en/rest/commits/commits#list-pull-requests-associated-with-a-commit).
+The reusable workflow does not request additional permissions itself. To disable
+the lookup, set `notes-from: none` under the caller's `with:`; the default is
+`notes-from: merge-request`. Other values fail validation. This input does not
+disable GitHub's generated notes.
+
+The workflow keeps `softprops/action-gh-release@v2`, whose
+[`body_path` input](https://github.com/softprops/action-gh-release/tree/v2#inputs)
+is prepended to the generated notes. Callers using `@v2` receive this feature only
+after a maintainer publishes the workflow release and moves the `v2` tag.
+
 ### Publishing setup
 
 The `gh-pages-publish` workflow creates docs on GitHub Pages.  For example, the demo Lib docs are here: [javadoc API docs](https://jeffersonlab.github.io/java-workflows/).  The workflow creates a new directory in the [gh-pages](https://github.com/JeffersonLab/java-workflows/tree/gh-pages) branch of your project for each release using the semver name and copies the auto generated API docs there.  An index HTML with JavaScript can then use the GitHub API to lookup the directories in the branch and list them in the index.  This means there is a one-time setup for each project where you need to commit and push the index.html, index.js, and .nojekyll files.  The path to the docs are then obtained at `https://jeffersonlab.github.io/project/` where project is your project name.  Example [setup commit](https://github.com/JeffersonLab/cxx-workflows/commit/36de0f35037c3b14834bbfbbb9e7784f2e70eebe) - notice first line of index.js must be customized with project name.
@@ -78,6 +135,14 @@ This project includes a `Hello World` Java app to demonstrate the workflow.  Use
 
 ```
 gradlew build
+```
+
+Workflow release-note tests run without API calls or publishing:
+
+```bash
+python3 -m venv /tmp/java-workflows-tests
+/tmp/java-workflows-tests/bin/pip install -r tests/requirements.txt
+/tmp/java-workflows-tests/bin/python -m unittest discover -s tests -v
 ```
 
 ## Workflow Updates
